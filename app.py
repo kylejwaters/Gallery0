@@ -48,7 +48,7 @@ def make_cards(eth_address):
     
     #create dash bootstrap component cards 
     cards = []
-    
+    creators = {}
     #create list of cards 
     for asset_dict in ds:
         
@@ -56,9 +56,12 @@ def make_cards(eth_address):
         for asset in asset_dict["assets"]:
             
             name = asset["name"]
-            
             if name == None:
                 name = asset["asset_contract"]["name"] + " " + asset["token_id"] 
+            
+            creator = asset["creator"]
+            if creator:
+                creators[name] = creator
             
             opensea_link = asset["permalink"]
             
@@ -69,20 +72,34 @@ def make_cards(eth_address):
                 
                 #no mp4s
                 if img.endswith(".mp4"):
-                    img = asset["image_original_url"]
+                    if asset["image_original_url"]==None:
+                        img = asset["image_url"]
+                    else:
+                        img = asset["image_original_url"]
+            
+            if asset["collection"]["featured_image_url"]:
+                
+                if asset["collection"]["name"]=="SuperRare":
+                    collection_img=asset["collection"]["featured_image_url"]
+                else:
+                    collection_img=asset["collection"]["large_image_url"]
+                    
+            else:
+                collection_img="https://storage.googleapis.com/opensea-static/opensea-profile/33.png"
             
             card = dbc.Card(
                [
                    dbc.CardImg(src="{}".format(img), className = 'align-self-center'),
-                   dbc.CardBody(
-                       [
-                           html.H5("{}".format(name),style={"font-family": "Consolas","font-size":"16px"})
-                           ]
+                   dbc.Button(
+                       color="grey",
+                       
+                       children=[html.Img(src=collection_img,style={"max-width":"30px","max-height":"30px"}),
+                        html.A("{}".format(name), href="{}".format(opensea_link),style={"font-size":"14px","color":"black"})],
+                       
                        ),
-                   dbc.Button("View on OpenSea", color="grey",href="{}".format(opensea_link),style={"font-size":"10px"}),
-               ],
-               style={"width": "18rem"}
-               ,outline=True,color="dark",className="col-md-4"
+               ]#,
+               #style={"width": "10rem"}
+               ,outline=False #className="col-md-8"
                )
             ##append
             cards.append(card)
@@ -108,7 +125,7 @@ app.layout = html.Div(
     html.Br(),
     html.Br(),
   
-    dbc.CardColumns(id="cards")]),
+    dbc.CardColumns(id="cards", style={'padding': '25px'})]),
      
     html.A(''),
     html.Br(),
@@ -129,6 +146,5 @@ def load_output(n,value):
 
 if __name__ == '__main__':
     app.run_server()            
-         
-
+      
 
