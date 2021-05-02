@@ -13,7 +13,6 @@ from dash.dependencies import Input, Output, State
 import requests
 
 def get_assets_from_address(eth_address):    
-    
     #initialize
     ds = []
     
@@ -64,8 +63,8 @@ def make_cards(eth_address):
                 creators[name] = creator
             
             opensea_link = asset["permalink"]
-            
-            if asset["animation_url"]==None:
+      
+            if asset["animation_url"]==None or asset["animation_url"].endswith("html"):
                 img = asset["image_url"]
             else:    
                 img = asset["animation_url"]
@@ -85,7 +84,10 @@ def make_cards(eth_address):
                     collection_img=asset["collection"]["large_image_url"]
                     
             else:
-                collection_img="https://storage.googleapis.com/opensea-static/opensea-profile/33.png"
+                if asset["collection"]["name"]=="Rarible":
+                    collection_img ="https://lh3.googleusercontent.com/FG0QJ00fN3c_FWuPeUr9-T__iQl63j9hn5d6svW8UqOmia5zp3lKHPkJuHcvhZ0f_Pd6P2COo9tt9zVUvdPxG_9BBw=w128"
+                else:            
+                    collection_img="https://storage.googleapis.com/opensea-static/opensea-profile/33.png"
             
             card = dbc.Card(
                [
@@ -99,7 +101,7 @@ def make_cards(eth_address):
                        ),
                ]#,
                #style={"width": "10rem"}
-               ,outline=False #className="col-md-8"
+               #,outline=False, className="col-md-3"
                )
             ##append
             cards.append(card)
@@ -121,7 +123,7 @@ app.layout = html.Div(
         html.Div([dcc.Input(id='input-on-submit', type='text')],style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}),
         html.Div([html.Button('Submit', id='submit-val')],style={'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}),
         html.Br(),
-        dbc.Spinner(html.Div(id="loading-output")),
+        dbc.Spinner(html.Div(id="loading-output2")),
     html.Br(),
     html.Br(),
   
@@ -140,7 +142,7 @@ app.layout = html.Div(
 )
 
 def load_output(n,value):
-    if n:
+    if value:
         return make_cards(eth_address=value)
     return ""
 
